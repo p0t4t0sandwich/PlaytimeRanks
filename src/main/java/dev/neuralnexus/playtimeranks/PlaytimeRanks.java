@@ -6,14 +6,8 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
-import net.md_5.bungee.event.EventHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,13 +16,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-public final class PlaytimeRanks extends Plugin implements Listener {
+public final class PlaytimeRanks extends Plugin {
     public static YamlDocument config;
     private static HikariConfig dbconfig = new HikariConfig();
     private static HikariDataSource ds;
     private LuckPerms luckPerms;
+
+    // Singleton instance
+    private static PlaytimeRanks instance;
+    public static PlaytimeRanks getInstance() {
+        return instance;
+    }
+
     @Override
     public void onEnable() {
         // Config
@@ -54,7 +54,7 @@ public final class PlaytimeRanks extends Plugin implements Listener {
         this.luckPerms = LuckPermsProvider.get();
 
         // Register event listeners
-        getProxy().getPluginManager().registerListener(this, this);
+        getProxy().getPluginManager().registerListener(this, new EventListener());
 
         // Plugin enable message
         getLogger().info("PlaytimeRanks has been enabled.");
@@ -72,7 +72,8 @@ public final class PlaytimeRanks extends Plugin implements Listener {
     }
 
     // Get Playtime from database
-    public int getPlaytime(String player_uuid) {
+    public int getPlaytime(ProxiedPlayer player) {
+        String player_uuid = player.getUniqueId().toString();
         Connection con;
         int playtime = 0;
         try {
@@ -114,18 +115,18 @@ public final class PlaytimeRanks extends Plugin implements Listener {
     }
 
     // Add permission to player
-    public void addPermission(UUID userUuid, String permission) {
+    public void addPermission(ProxiedPlayer player, String permission) {
         // Load, modify, then save
-        luckPerms.getUserManager().modifyUser(userUuid, user -> {
+        luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> {
             // Add the permission
             user.data().add(Node.builder(permission).build());
         });
     }
 
     // Remove permission from player
-    public void removePermission(UUID userUuid, String permission) {
+    public void removePermission(ProxiedPlayer player, String permission) {
         // Load, modify, then save
-        luckPerms.getUserManager().modifyUser(userUuid, user -> {
+        luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> {
             // Remove the permission
             user.data().remove(Node.builder(permission).build());
         });
@@ -156,33 +157,13 @@ public final class PlaytimeRanks extends Plugin implements Listener {
                 // Check if player has enough playtime
                 if (playtime >= time) {
                     // Add permission to player
-                    addPermission(player.getUniqueId(), "group." + rank);
+                    addPermission(player, "group." + rank);
                     // Remove previous rank
-                    removePermission(player.getUniqueId(), "group." + previousRank);
+                    removePermission(player, "group." + previousRank);
                     return rank;
                 }
             }
         }
         return null;
-    }
-
-    // Login event handler
-    @EventHandler
-    public void onPostLogin(PostLoginEvent event) {
-        ScheduledTask scheduledTask = getProxy().getScheduler().schedule(this, () -> {
-            // Player object
-            ProxiedPlayer player = event.getPlayer();
-
-            // Get playtime from database
-            int playtime = getPlaytime(player.getUniqueId().toString());
-
-            // Update player's rank
-            String rank = updateRank(player, playtime);
-
-            // Send new rank to player
-            if (rank != null) {
-                player.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&7[&6PlaytimeRanks&7] &fYour new rank is &6" + rank + "&f!")));
-            }
-        }, 0, TimeUnit.SECONDS);
     }
 }
