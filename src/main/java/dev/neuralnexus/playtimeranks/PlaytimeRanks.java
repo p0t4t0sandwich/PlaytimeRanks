@@ -74,7 +74,7 @@ public final class PlaytimeRanks extends Plugin {
     // Get Playtime from database
     public int getPlaytime(ProxiedPlayer player) {
         String player_uuid = player.getUniqueId().toString();
-        Connection con;
+        Connection con = null;
         int playtime = 0;
         try {
             con = getConnection();
@@ -105,6 +105,11 @@ public final class PlaytimeRanks extends Plugin {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                con.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             return playtime;
         }
     }
