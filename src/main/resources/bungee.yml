@@ -1,3 +1,0 @@
-name: PlaytimeRanks
-version: '${project.version}'
-main: dev.neuralnexus.playtimeranks.PlaytimeRanks

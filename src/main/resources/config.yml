@@ -1,8 +1,0 @@
-version: 1
-storage-method: mysql
-data:
-  address: localhost
-  database: database
-  username: root
-  password: password
-ranks: {}
