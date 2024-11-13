@@ -10,13 +10,15 @@ java.disableAutoTargetJvm()
 
 dependencies {
     compileOnly("net.luckperms:api:5.4")
+    compileOnly("org.spongepowered:configurate-hocon:4.2.0-SNAPSHOT")
     implementation("com.zaxxer:HikariCP:5.0.1")
-//    compileOnly(project(':api'))
-//    compileOnly(project(':common'))
+    implementation("dev.neuralnexus:taterapi:1.2.0-SNAPSHOT")
+//    compileOnly(project(":api"))
 }
 
 shadowJar {
     relocate("com.zaxxer.hikari", "dev.neuralnexus.playtimeranks.libs.hikari")
+    relocate("dev.neuralnexus.taterapi", "dev.neuralnexus.playtimeranks.libs.taterapi")
     archiveClassifier = "shaded"
 }
 

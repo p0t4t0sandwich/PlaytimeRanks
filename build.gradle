@@ -16,27 +16,17 @@ ext.bundleJars = { Map<String, List<String>> platformVersions ->
     ]
     platformVersions.each { platform, versions ->
         versions.each { mcVersion ->
-            jarFiles.add(file("${platform}/${platform}-${mcVersion}/build/libs/${project_id}-${platform}-${mcVersion}-${version}.jar") as File)
+            jarFiles.add(file("${platform}/build/libs/${project_id}-${platform}-${mcVersion}-${version}.jar") as File)
         }
     }
     def zipped = jarFiles.collect {
-        zipTree(it).matching {
-            exclude('pcf.mixins.*')
-        }
-    }
-    def mixinConfigs = []
-    jarFiles.collect {
-        zipTree(it).files.each { file ->
-            if (file.name.startsWith("pcf.mixins.")) {
-                mixinConfigs.add(file)
-            }
-        }
+        zipTree(it)
     }
     return zipped
 }
 
 subprojects {
-    apply(plugin: 'java')
+    apply(plugin: "java")
     apply(plugin: libs.plugins.spotless.get().pluginId)
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -44,7 +34,7 @@ subprojects {
     targetCompatibility = 21
 
     tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8'
+        options.encoding = "UTF-8"
     }
 
     repositories {
@@ -59,8 +49,8 @@ subprojects {
 
         // NeuralNexus Mirror
         maven {
-            name = 'NeuralNexus Mirror'
-            url = 'https://maven.neuralnexus.dev/mirror'
+            name = "NeuralNexus Mirror"
+            url = "https://maven.neuralnexus.dev/mirror"
         }
 
         // Minecraft
@@ -77,8 +67,8 @@ subprojects {
     }
 
     spotless {
-        format 'misc', {
-            target '*.gradle', '.gitattributes', '.gitignore'
+        format "misc", {
+            target "*.gradle", ".gitattributes", ".gitignore"
 
             trimTrailingWhitespace()
             indentWithSpaces()
@@ -89,7 +79,7 @@ subprojects {
             importOrder()
             removeUnusedImports()
             cleanthat()
-            googleJavaFormat('1.17.0').aosp().formatJavadoc(true).reorderImports(true)
+            googleJavaFormat("1.17.0").aosp().formatJavadoc(true).reorderImports(true)
             formatAnnotations()
         }
     }
@@ -105,8 +95,8 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 var platformVersions = [:]
-platformVersions.put("bungeecord", Arrays.asList(""))
-platformVersions.put("velocity", Arrays.asList(""))
+platformVersions.put("bungee", Arrays.asList("1.20"))
+platformVersions.put("velocity", Arrays.asList("3"))
 
 tasks.register("buildAllTheStuffNowBcGradleIsDumb", Task) {
     dependsOn(":common:build")
@@ -123,14 +113,14 @@ tasks.register("shadeAndRelocate", ShadowJar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes([
+        attributes(
                 "Specification-Title"     : "${project_name}",
                 "Specification-Version"   : version,
-                "Specification-Vendor"    : 'NeuralNexus',
+                "Specification-Vendor"    : "NeuralNexus",
                 "Implementation-Version"  : version,
-                "Implementation-Vendor"   : 'NeuralNexus',
+                "Implementation-Vendor"   : "NeuralNexus",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
+        )
     }
 
     from(["README.md", "LICENSE"]) {

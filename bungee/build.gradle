@@ -4,6 +4,6 @@ base {
 
 dependencies {
     compileOnly("net.md-5:bungeecord-api:${minecraft_version}-${bungeecord_version}")
-//    compileOnly(project(':api'))
-    compileOnly(project(':common'))
+//    compileOnly(project(":api"))
+    compileOnly(project(":common"))
 }

@@ -1,3 +1,4 @@
 name: PlaytimeRanks
-version: '${project.version}'
-main: dev.neuralnexus.playtimeranks.bungee.PlaytimeRanks
+version: "${project.version}"
+main: dev.neuralnexus.playtimeranks.bungee.PlaytimeRanksBungee
+depends: [LuckPerms]
