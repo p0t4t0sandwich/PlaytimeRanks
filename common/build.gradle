@@ -1,0 +1,23 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+base {
+    archivesName = "${project_id}-common"
+}
+
+java.disableAutoTargetJvm()
+
+dependencies {
+    compileOnly("net.luckperms:api:5.4")
+    implementation("com.zaxxer:HikariCP:5.0.1")
+//    compileOnly(project(':api'))
+//    compileOnly(project(':common'))
+}
+
+shadowJar {
+    relocate("com.zaxxer.hikari", "dev.neuralnexus.playtimeranks.libs.hikari")
+    archiveClassifier = "shaded"
+}
+
+tasks.build.dependsOn(shadowJar)

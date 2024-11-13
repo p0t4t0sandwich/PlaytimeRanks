@@ -1,0 +1,3 @@
+name: PlaytimeRanks
+version: '${project.version}'
+main: dev.neuralnexus.playtimeranks.bungee.PlaytimeRanks
